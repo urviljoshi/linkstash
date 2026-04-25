@@ -9,3 +9,15 @@ target/
 *.swp
 
 application-local.yml
+plan.md
+.mcp.json
+.claude/settings.local.json
+.claude/agents/apply-findings.md
+.claude/agents/comment-resolver.md
+.claude/agents/explore-codebase.md
+.claude/agents/implement-plan.md
+.claude/agents/issue-resolver.md
+.claude/agents/plan-feature.md
+.claude/agents/resolve-comment.md
+.claude/agents/run-ultrareview.md
+docs/ARCHITECTURE.md
