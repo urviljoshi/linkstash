@@ -23,6 +23,9 @@ public class Link {
     @Column(name = "click_count", nullable = false)
     private Long clickCount = 0L;
 
+    @Column(name = "expires_at")
+    private Instant expiresAt;
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -37,4 +40,7 @@ public class Link {
 
     public Long getClickCount() { return clickCount; }
     public void setClickCount(Long clickCount) { this.clickCount = clickCount; }
+
+    public Instant getExpiresAt() { return expiresAt; }
+    public void setExpiresAt(Instant expiresAt) { this.expiresAt = expiresAt; }
 }

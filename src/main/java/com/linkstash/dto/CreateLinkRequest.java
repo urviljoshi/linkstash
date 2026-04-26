@@ -1,4 +1,6 @@
 package com.linkstash.dto;
 
-public record CreateLinkRequest(String url) {
+import java.time.Instant;
+
+public record CreateLinkRequest(String url, Instant expiresAt) {
 }
