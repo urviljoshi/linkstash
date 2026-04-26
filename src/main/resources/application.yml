@@ -4,11 +4,11 @@ spring:
     driver-class-name: org.h2.Driver
   h2:
     console:
-      enabled: true
+      enabled: false
   jpa:
     hibernate:
       ddl-auto: validate
-    show-sql: true
+    show-sql: false
   flyway:
     enabled: true
 
@@ -17,3 +17,14 @@ server:
 
 linkstash:
   base-url: http://localhost:8080
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+  h2:
+    console:
+      enabled: true
+  jpa:
+    show-sql: true

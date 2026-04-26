@@ -4,12 +4,11 @@ import com.linkstash.dto.CreateLinkRequest;
 import com.linkstash.dto.LinkResponse;
 import com.linkstash.repository.LinkRepository;
 import com.linkstash.domain.Link;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -22,17 +21,19 @@ class LinkServiceTest {
     @Mock
     private LinkRepository linkRepository;
 
-    @InjectMocks
     private LinkService linkService;
+
+    @BeforeEach
+    void setUp() {
+        linkService = new LinkService(linkRepository, "http://localhost:8080");
+    }
 
     @Test
     void createLink_returnsResponseWithShortCode() {
-        ReflectionTestUtils.setField(linkService, "baseUrl", "http://localhost:8080");
-
         when(linkRepository.existsByShortCode(anyString())).thenReturn(false);
         when(linkRepository.save(any(Link.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        LinkResponse response = linkService.createLink(new CreateLinkRequest("https://example.com"));
+        LinkResponse response = linkService.createLink(new CreateLinkRequest("https://example.com", null));
 
         assertThat(response.shortCode()).isNotNull();
         assertThat(response.shortCode()).hasSize(8);

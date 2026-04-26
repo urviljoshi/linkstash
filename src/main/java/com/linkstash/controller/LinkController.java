@@ -3,7 +3,9 @@ package com.linkstash.controller;
 import com.linkstash.dto.CreateLinkRequest;
 import com.linkstash.dto.LinkResponse;
 import com.linkstash.dto.LinkStatsResponse;
+import com.linkstash.service.ApiKeyService;
 import com.linkstash.service.LinkService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,21 +17,28 @@ import java.net.URI;
 public class LinkController {
 
     private final LinkService linkService;
+    private final ApiKeyService apiKeyService;
 
-    public LinkController(LinkService linkService) {
+    public LinkController(LinkService linkService, ApiKeyService apiKeyService) {
         this.linkService = linkService;
+        this.apiKeyService = apiKeyService;
     }
 
     @PostMapping("/api/v1/links")
-    public ResponseEntity<LinkResponse> createLink(@RequestBody CreateLinkRequest request) {
+    public ResponseEntity<LinkResponse> createLink(
+            @RequestHeader(value = "X-API-Key", required = false) String apiKey,
+            @Valid @RequestBody CreateLinkRequest request) {
+        apiKeyService.validateAndConsume(apiKey);
         LinkResponse response = linkService.createLink(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/{shortCode}")
     public ResponseEntity<Void> redirect(@PathVariable String shortCode) {
-        linkService.incrementClick(shortCode);
-        String originalUrl = linkService.getOriginalUrl(shortCode);
+        String originalUrl = linkService.resolveRedirect(shortCode);
+        if (!originalUrl.startsWith("http://") && !originalUrl.startsWith("https://")) {
+            throw new IllegalArgumentException("Resolved URL has an unsafe scheme: " + originalUrl);
+        }
         HttpHeaders headers = new HttpHeaders();
         headers.setLocation(URI.create(originalUrl));
         return new ResponseEntity<>(headers, HttpStatus.FOUND);
