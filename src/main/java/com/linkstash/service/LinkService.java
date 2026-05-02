@@ -4,9 +4,11 @@ import com.linkstash.domain.Link;
 import com.linkstash.dto.CreateLinkRequest;
 import com.linkstash.dto.LinkResponse;
 import com.linkstash.dto.LinkStatsResponse;
+import com.linkstash.exception.LinkExpiredException;
 import com.linkstash.repository.LinkRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
 import java.time.Instant;
@@ -46,14 +48,18 @@ public class LinkService {
         link.setOriginalUrl(request.url());
         link.setCreatedAt(Instant.now());
         link.setClickCount(0L);
+        link.setExpiresAt(request.expiresAt());
         linkRepository.save(link);
 
-        return new LinkResponse(shortCode, baseUrl + "/" + shortCode, request.url());
+        return new LinkResponse(shortCode, baseUrl + "/" + shortCode, request.url(), request.expiresAt());
     }
 
     public String getOriginalUrl(String shortCode) {
         Link link = linkRepository.findByShortCode(shortCode)
                 .orElseThrow(() -> new NoSuchElementException("Short code not found: " + shortCode));
+        if (link.getExpiresAt() != null && link.getExpiresAt().isBefore(Instant.now())) {
+            throw new LinkExpiredException();
+        }
         return link.getOriginalUrl();
     }
 
@@ -67,7 +73,7 @@ public class LinkService {
     public LinkStatsResponse getStats(String shortCode) {
         Link link = linkRepository.findByShortCode(shortCode)
                 .orElseThrow(() -> new NoSuchElementException("Short code not found: " + shortCode));
-        return new LinkStatsResponse(link.getShortCode(), link.getOriginalUrl(), link.getClickCount(), link.getCreatedAt());
+        return new LinkStatsResponse(link.getShortCode(), link.getOriginalUrl(), link.getClickCount(), link.getCreatedAt(), link.getExpiresAt());
     }
 
     public void deleteLink(String shortCode) {

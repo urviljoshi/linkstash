@@ -32,7 +32,7 @@ class LinkServiceTest {
         when(linkRepository.existsByShortCode(anyString())).thenReturn(false);
         when(linkRepository.save(any(Link.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        LinkResponse response = linkService.createLink(new CreateLinkRequest("https://example.com"));
+        LinkResponse response = linkService.createLink(new CreateLinkRequest("https://example.com", null));
 
         assertThat(response.shortCode()).isNotNull();
         assertThat(response.shortCode()).hasSize(8);

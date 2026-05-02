@@ -27,9 +27,10 @@ class LinkControllerTest {
 
     @Test
     void createLink_returnsShortCode() throws Exception {
-        CreateLinkRequest request = new CreateLinkRequest("https://example.com");
+        CreateLinkRequest request = new CreateLinkRequest("https://example.com", null);
 
         mockMvc.perform(post("/api/v1/links")
+                        .header("X-API-Key", "test-key-12345")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -40,9 +41,10 @@ class LinkControllerTest {
 
     @Test
     void getStats_returnsClickCount() throws Exception {
-        CreateLinkRequest request = new CreateLinkRequest("https://stats-test.com");
+        CreateLinkRequest request = new CreateLinkRequest("https://stats-test.com", null);
 
         MvcResult createResult = mockMvc.perform(post("/api/v1/links")
+                        .header("X-API-Key", "test-key-12345")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
