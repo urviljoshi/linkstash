@@ -12,8 +12,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Component
 public class RateLimiter {
 
-    static final int MAX_REQUESTS = 10;
-    static final long WINDOW_SECONDS = 60;
+    public static final int MAX_REQUESTS = 10;
+    public static final long WINDOW_SECONDS = 60;
 
     private final ConcurrentHashMap<String, WindowState> windows = new ConcurrentHashMap<>();
 
@@ -24,10 +24,10 @@ public class RateLimiter {
      *         how many seconds until the window resets.
      */
     public RateResult tryAcquire(String apiKey) {
-        long now = Instant.now().getEpochSecond();
         WindowState state = windows.compute(apiKey, (k, existing) -> {
-            if (existing == null || now >= existing.windowStart + WINDOW_SECONDS) {
-                return new WindowState(now, new AtomicInteger(0));
+            long t = Instant.now().getEpochSecond();
+            if (existing == null || t >= existing.windowStart + WINDOW_SECONDS) {
+                return new WindowState(t, new AtomicInteger(0));
             }
             return existing;
         });
@@ -36,8 +36,16 @@ public class RateLimiter {
         if (count <= MAX_REQUESTS) {
             return RateResult.allowed();
         }
+        long now = Instant.now().getEpochSecond();
         long retryAfter = (state.windowStart + WINDOW_SECONDS) - now;
+        // Opportunistically evict entries whose window has fully expired.
+        windows.entrySet().removeIf(e -> now >= e.getValue().windowStart + WINDOW_SECONDS);
         return RateResult.denied(Math.max(retryAfter, 1));
+    }
+
+    /** Clears all window state. Intended for use in tests only. */
+    public void reset() {
+        windows.clear();
     }
 
     public static class WindowState {

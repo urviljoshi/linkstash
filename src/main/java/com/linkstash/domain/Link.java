@@ -24,7 +24,7 @@ public class Link {
     private Long clickCount = 0L;
 
     @Column(name = "expires_at")
-    private java.time.Instant expiresAt;
+    private Instant expiresAt;
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -41,6 +41,6 @@ public class Link {
     public Long getClickCount() { return clickCount; }
     public void setClickCount(Long clickCount) { this.clickCount = clickCount; }
 
-    public java.time.Instant getExpiresAt() { return expiresAt; }
-    public void setExpiresAt(java.time.Instant expiresAt) { this.expiresAt = expiresAt; }
+    public Instant getExpiresAt() { return expiresAt; }
+    public void setExpiresAt(Instant expiresAt) { this.expiresAt = expiresAt; }
 }

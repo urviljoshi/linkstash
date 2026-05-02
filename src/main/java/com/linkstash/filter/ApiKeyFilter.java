@@ -27,16 +27,15 @@ public class ApiKeyFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
-        // Only apply to POST /api/v1/links
-        return !(request.getMethod().equals("POST") &&
-                request.getRequestURI().equals("/api/v1/links"));
-    }
-
-    @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
+        // FilterRegistrationBean restricts this filter to POST /api/v1/links,
+        // but guard here too so the filter is safe if re-used on wider patterns.
+        if (!"POST".equals(request.getMethod())) {
+            filterChain.doFilter(request, response);
+            return;
+        }
         String keyValue = request.getHeader("X-API-Key");
 
         if (keyValue == null || keyValue.isBlank()) {

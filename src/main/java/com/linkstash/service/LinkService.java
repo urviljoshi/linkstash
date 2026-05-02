@@ -30,9 +30,13 @@ public class LinkService {
         this.linkRepository = linkRepository;
     }
 
+    @Transactional
     public LinkResponse createLink(CreateLinkRequest request) {
         if (request.url() == null || !request.url().startsWith("http")) {
             throw new IllegalArgumentException("Invalid URL");
+        }
+        if (request.expiresAt() != null && !request.expiresAt().isAfter(Instant.now())) {
+            throw new IllegalArgumentException("expiresAt must be a future instant");
         }
 
         String shortCode;
@@ -54,6 +58,7 @@ public class LinkService {
         return new LinkResponse(shortCode, baseUrl + "/" + shortCode, request.url(), request.expiresAt());
     }
 
+    @Transactional(readOnly = true)
     public String getOriginalUrl(String shortCode) {
         Link link = linkRepository.findByShortCode(shortCode)
                 .orElseThrow(() -> new NoSuchElementException("Short code not found: " + shortCode));
@@ -63,6 +68,7 @@ public class LinkService {
         return link.getOriginalUrl();
     }
 
+    @Transactional
     public void incrementClick(String shortCode) {
         Link link = linkRepository.findByShortCode(shortCode)
                 .orElseThrow(() -> new NoSuchElementException("Short code not found: " + shortCode));
@@ -70,12 +76,14 @@ public class LinkService {
         linkRepository.save(link);
     }
 
+    @Transactional(readOnly = true)
     public LinkStatsResponse getStats(String shortCode) {
         Link link = linkRepository.findByShortCode(shortCode)
                 .orElseThrow(() -> new NoSuchElementException("Short code not found: " + shortCode));
         return new LinkStatsResponse(link.getShortCode(), link.getOriginalUrl(), link.getClickCount(), link.getCreatedAt(), link.getExpiresAt());
     }
 
+    @Transactional
     public void deleteLink(String shortCode) {
         Link link = linkRepository.findByShortCode(shortCode)
                 .orElseThrow(() -> new NoSuchElementException("Short code not found: " + shortCode));
