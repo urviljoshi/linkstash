@@ -1,4 +1,6 @@
 package com.linkstash.dto;
 
-public record LinkResponse(String shortCode, String shortUrl, String originalUrl) {
+import java.time.Instant;
+
+public record LinkResponse(String shortCode, String shortUrl, String originalUrl, Instant expiresAt) {
 }
