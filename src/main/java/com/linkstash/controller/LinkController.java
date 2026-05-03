@@ -28,8 +28,8 @@ public class LinkController {
 
     @GetMapping("/{shortCode}")
     public ResponseEntity<Void> redirect(@PathVariable String shortCode) {
-        linkService.incrementClick(shortCode);
         String originalUrl = linkService.getOriginalUrl(shortCode);
+        linkService.incrementClick(shortCode);
         HttpHeaders headers = new HttpHeaders();
         headers.setLocation(URI.create(originalUrl));
         return new ResponseEntity<>(headers, HttpStatus.FOUND);
